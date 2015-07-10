@@ -1,71 +1,49 @@
-#include <iostream> 
-#include "sqlite3.h"
+#include <iostream>
+#include <string>
+#include <string.h>
+#include <stdio.h>
 using namespace std;
 
-static int callback(void *data, int argc, char **argv, char **azColName) {
-	int i;
-	if(data != NULL) {
-		cout << (const char*)data << endl;	
+const string HELP_STR = "\n" 
+			"***************************************************\n" 
+			"* sdb is a simple student and course mgmt system  *\n"
+			"***************************************************\n"
+			"\nusage:\n"
+			"\n\tsdb, sdb help: prints this help message"
+			"\n\tsdb lss: lists all students"
+			"\n\tsdb lss 'courseid': lists all students in course"
+			"\n\tsdb adds 'firstname' 'surname' 'age' 'address':"
+			"\n\t\tadds a student to the system"
+			"\n\tsdb lsc: lists all courses"
+			"\n\tsdb lsc 'studentid' lists a students courses"
+			"\n\tsdb addc 'name' 'description' 'period' 'lecturer'"
+			"\n\t\tadds a course to the system"
+			"\n\tenrol 'studentid' 'courseid':"
+			"\n\t\tenrols a student into a course\n";
+
+int main(int argc, char* argv[]) {
+	if(argc > 1 && strcmp(argv[1], "lss") == 0) {
+		cout << "list all students" << endl;
+		return 0;
+	}	
+	if(argc > 1 && strcmp(argv[1], "adds") == 0) {
+		cout << "add a student" << endl;
+		return 0;
 	}
-	for(i=0; i<argc; i++) {
-		cout << azColName[i] << ", " << (argv[i] ? argv[i] : "NULL") << endl;
+	if(argc > 1 && strcmp(argv[1], "lsc") == 0) {
+		cout << "lists all courses" << endl;
+		return 0;
 	}
-	return 0;
-}
-
-
-int main() {
-	sqlite3* db;
-	char *zErrMsg = 0;
-	int rc;
-	char const *sql;
-	const char* data = "Callback function called!";
-
-	rc = sqlite3_open("sdb.sqlite", &db);
-	if( rc ) {
-		cout << "Can't open db: " << sqlite3_errmsg(db) << endl;
-	} else {
-		cout << "Opened db successfully" << endl;
+	if(argc > 1 && strcmp(argv[1], "addc") == 0) {
+		cout << "adds a course" << endl;
+		return 0;
 	}
-
-	// Create Student Table
-	sql = 	"CREATE TABLE IF NOT EXISTS STUDENT("\
-		"ID		INTEGER PRIMARY KEY,"\
-		"FIRSTNAME	TEXT	NOT NULL,"\
-		"SURNAME	TEXT	NOT NULL,"\
-		"AGE		INT	NOT NULL,"\
-		"ADDRESS	CHAR(50));";
-
-	// Execute SQL Statement
-	rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-	if(rc != SQLITE_OK ) {
-		cerr << "SQL error: " << zErrMsg << endl;
-	} else {
-		cout << "Student Table Exists!" << endl;
+	if(argc > 1 && strcmp(argv[1], "enrol") == 0) {
+		cout << "enrols a student" << endl;
+		return 0;
 	}
-
-	// Insert Test Student
-	sql =	"INSERT INTO STUDENT (ID, FIRSTNAME, SURNAME, AGE, ADDRESS)"\
-		"VALUES(NULL, 'Dan', 'Roberts', 26, '337 Coutts Island Rd')";
 	
-	// Execute SQL Statement
-	rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-	if(rc != SQLITE_OK) {
-		cout << "Couldn't insert student: " << zErrMsg << endl;
-	} else {
-		cout << "Inserted student!" << endl;
-	}
-
-	// Select All Students
-	sql = "SELECT * FROM STUDENT";
-
-	rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
-	if( rc != SQLITE_OK ) {
-		cout << "Error getting students: " << zErrMsg << endl;
-	} else {
-		cout << "Retrieved Students!" << endl;
-	}
-	sqlite3_close(db);
+	cout << HELP_STR << endl;	
 	return 0;
 }
-
+		
