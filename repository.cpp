@@ -151,22 +151,55 @@ bool Repository::enrolStudent(int studentId, int courseId) {
 	if(!courseExists(courseId)) {
 		return false;
 	}
-	
+	char *zErrMsg = 0;
 	char* sql = sqlite3_mprintf(
-		"INSERT INTO ENROLMENT (STUDENTID, COURSEID)"
+		"INSERT OR REPLACE INTO ENROLMENT (STUDENTID, COURSEID)"
 		"VALUES('%i', '%i')",
 		studentId,
 		courseId
 	);
 
         // Execute SQL Statement
-        int rc = sqlite3_exec(db, sql, 0, 0, 0);
+        int rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if(rc != SQLITE_OK) {
+		cerr << zErrMsg << endl;
 		return false;
         }
 	return true;
 }
 
+bool Repository::getStudentCourses(vector<Course> &cv, int studentId) {
+	// Select courses which a student
+	// has enroled in by joining enrolment with matching
+	// course and selecting where studentid matches
+	char* sql = sqlite3_mprintf(
+		"SELECT C.* FROM COURSE AS C "
+		"JOIN ENROLMENT AS E ON C.ID=E.COURSEID "
+		"WHERE E.STUDENTID=%i",
+		studentId
+	); 
+        int rc = sqlite3_exec(db, sql, courseCallback, (void*)&cv, 0);
+        if( rc != SQLITE_OK ) {
+		return false;
+        }
+	return true;
+}
+
+
+bool Repository::getCourseStudents(vector<Student> &sv, int courseId) {
+	char* sql = sqlite3_mprintf(
+		"SELECT S.* FROM STUDENT AS S "
+		"JOIN ENROLMENT AS E ON S.ID=E.STUDENTID "
+		"WHERE E.COURSEID=%i",
+		courseId
+	); 
+        int rc = sqlite3_exec(db, sql, studentCallback, (void*)&sv, 0);
+        if( rc != SQLITE_OK ) {
+		return false;
+        }
+	return true;
+
+}
 
 bool Repository::init() {
        	char *zErrMsg = 0;

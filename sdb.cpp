@@ -54,6 +54,16 @@ const string HELP_ENROL_STR =	"\nIncorrect usage of 'enrol' command\n\n"
 				"\tnote that both studentId and courseId must be\n"
 				"\tpositive integers\n\n";
 
+const string HELP_LSSC_STR =	"\nIncorrect usage of 'lssc' command\n\n"
+				"Usage:\n"
+				"\tsdb lssc 'studentid'\n"
+				"\tnote that student id must be a positive integer\n";
+
+const string HELP_LSCS_STR =	"\nIncorrect usage of 'lscs' command\n\n"
+				"Usage:\n"
+				"\tsdb lscs 'courseid'\n"
+				"\tnote that course id must be a positive integer\n";
+
 Repository repo; // global repo instance
 
 void listStudents(int argc, char* argv[]) {
@@ -128,7 +138,8 @@ void listCourses(int argc, char* argv[]) {
 	}
         for(vector<Course>::iterator it = cv.begin(); it != cv.end(); ++it) {
                 it->print();
-        }
+        
+	}
 }
 
 void addCourse(int argc, char* argv[]) {
@@ -153,6 +164,7 @@ void enrolStudent(int argc, char* argv[]) {
 			int courseId = stoi(argv[3], &sz2);
 			bool validArg = sz1 == strlen(argv[2]) && sz2 == strlen(argv[3]);
 			if(validArg && repo.enrolStudent(studentId, courseId)) {
+				cout << "COMPLETEED";
 				return;
 			}
 		
@@ -161,6 +173,62 @@ void enrolStudent(int argc, char* argv[]) {
 		}
 	}
 	cout << HELP_ENROL_STR << endl;
+}
+
+void listStudentCourses(int argc, char* argv[]) {
+	if(argc == 3) {
+		vector<Course> cv;
+		int studentId;
+		bool validId = true;
+		try {
+			string::size_type sz;
+			studentId = stoi(argv[2], &sz);
+			validId = sz == strlen(argv[2]);
+		} catch (const invalid_argument& ia) {
+			validId = false;
+		}
+		if(!validId) {
+			cout << HELP_LSSC_STR << endl; 
+			return;
+		}
+		if(!repo.getStudentCourses(cv, studentId)) {
+			cerr << "There was an error getting the students courses!" << endl; 
+			return;
+		}
+		for(vector<Course>::iterator it = cv.begin(); it != cv.end(); ++it) {
+                	it->print();
+		}
+	} else {
+		cout << HELP_LSSC_STR << endl;
+	}
+}
+
+void listCourseStudents(int argc, char* argv[]) {
+	if(argc == 3) {
+		vector<Student> sv;
+		int courseId;
+		bool validId = true;
+		try {
+			string::size_type sz;
+			courseId = stoi(argv[2], &sz);
+			validId = sz == strlen(argv[2]);
+		} catch (const invalid_argument& ia) {
+			validId = false;
+		}
+		if(!validId) {
+			cout << HELP_LSCS_STR << endl; 
+			return;
+		}
+		if(!repo.getCourseStudents(sv, courseId)) {
+			cerr << "There was an error getting the courses students!" << endl; 
+			return;
+		}
+		for(vector<Student>::iterator it = sv.begin(); it != sv.end(); ++it) {
+                	it->print();
+		}
+	} else {
+		cout << HELP_LSCS_STR << endl;
+	}
 }
 
 // Redirect sdb commands to dedicated functions
@@ -186,6 +254,14 @@ int main(int argc, char* argv[]) {
 	}
 	if(argc > 1 && strcmp(argv[1], "enrol") == 0) {
 		enrolStudent(argc, argv);
+		return 0;
+	}
+	if(argc > 1 && strcmp(argv[1], "lssc") == 0) {
+		listStudentCourses(argc, argv);
+		return 0;
+	}
+	if(argc > 1 && strcmp(argv[1], "lscs") == 0) {
+		listCourseStudents(argc, argv);
 		return 0;
 	}
 	cout << HELP_STR << endl;	

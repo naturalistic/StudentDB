@@ -22,6 +22,8 @@ class Repository {
 		bool insertStudent(Student s);
 		bool insertCourse(Course c);
 		bool enrolStudent(int studentId, int courseId);
+		bool getStudentCourses(vector<Course> &cv, int studentId);
+		bool getCourseStudents(vector<Student> &sv, int courseId);
 };
 
 }
